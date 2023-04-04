@@ -1,13 +1,18 @@
 import sys
 import os
+import subprocess
+from ffmpeg_installer import (
+    check_ffmpeg_installed,
+    install_ffmpeg
+)
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
     QPushButton,
     QFileDialog,
     QMessageBox,
+    QDesktopWidget,
 )
-from moviepy.editor import concatenate_videoclips, VideoFileClip
 
 
 class VideoMerger(QMainWindow):
@@ -18,14 +23,50 @@ class VideoMerger(QMainWindow):
 
     def initUI(self):
         self.setWindowTitle("Video Merger")
-
+        self.setGeometry(0, 0, 400, 300)
+        self.center()
         self.merge_btn = QPushButton("Merge Videos", self)
         self.merge_btn.clicked.connect(self.merge_videos)
         self.merge_btn.resize(self.merge_btn.sizeHint())
-        self.merge_btn.move(50, 50)
+        self.merge_btn.move(150, 120)
+        
 
-        self.setGeometry(300, 300, 200, 150)
+        if not check_ffmpeg_installed():
+            
+            message_box = QMessageBox()
+            message_box.setIcon(QMessageBox.Question)
+            message_box.setText("FFmpeg is required but is not installed. Do you want to install it?")
+            message_box.setWindowTitle("Confirmation")
+            message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            button_clicked = message_box.exec_()
+            oh_no_message = QMessageBox()
+            oh_no_message.setText("Unfortunately, the application will not work")
+
+            if button_clicked == QMessageBox.Yes:
+                install_ffmpeg()
+                if check_ffmpeg_installed():
+                    QMessageBox.information(self, "Sucess", "FFMpeg installed sucessfully, you can proceed and use the application")
+                    self.merge_btn.setEnabled(True)
+                else:
+                    oh_no_message.exec_()
+                    self.merge_btn.setEnabled(False)
+            else:
+                oh_no_message.exec_()
+                self.merge_btn.setEnabled(False)
+                
+        
         self.show()
+
+    def center(self):
+        # Get the screen geometry
+        screen = QDesktopWidget().screenGeometry()
+
+        # Calculate the center point
+        x = (screen.width() - self.geometry().width()) // 2
+        y = (screen.height() - self.geometry().height()) // 2
+
+        # Move the window to the center
+        self.move(x, y)
 
     def merge_videos(self):
         options = QFileDialog.Options()
@@ -39,19 +80,6 @@ class VideoMerger(QMainWindow):
         )
 
         if videos:
-            clips = []
-            for video in videos:
-                try:
-                    clip = VideoFileClip(video)
-                    clips.append(clip)
-                except Exception as e:
-                    QMessageBox.warning(
-                        self, "Error", f"Failed to load video file: {video}\n{str(e)}"
-                    )
-                    return
-
-            final_clip = concatenate_videoclips(clips)
-
             save_options = QFileDialog.Options()
             save_options |= QFileDialog.ReadOnly
             save_path, _ = QFileDialog.getSaveFileName(
@@ -66,12 +94,12 @@ class VideoMerger(QMainWindow):
                 if not save_path.endswith(".mp4"):
                     save_path += ".mp4"
 
-                final_clip.write_videofile(
-                    save_path,
-                    codec="libx264",
-                    preset="ultrafast",
-                    threads=os.cpu_count(),
+                videos_concatenated = "|".join(videos)
+                ffmpeg_command = (
+                    f'ffmpeg -i "concat:{videos_concatenated}" -c copy "{save_path}" -y'
                 )
+                os.system(ffmpeg_command)
+
                 QMessageBox.information(
                     self,
                     "Success",

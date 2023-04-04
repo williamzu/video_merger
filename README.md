@@ -16,6 +16,11 @@ cd VideoMerger
 
 `pip install -r requirements.txt`
 
+4. Linux users:
+Install the ffmpeg package if you want to use your GPU to accelerate the writing process:
+`sudo apt  install ffmpeg`
+
+
 ## Usage
 
 1. To run the application, open the terminal in the project directory and type:
