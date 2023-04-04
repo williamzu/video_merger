@@ -29,13 +29,3 @@ cd VideoMerger
 4. After the videos are merged, you will be prompted to specify a location to save the merged video file. The default save location is the source folder of the selected video files.
 
 5. Click "Save" to complete the process. A success message will be displayed once the merged video is saved.
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
-
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
