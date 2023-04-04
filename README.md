@@ -14,13 +14,13 @@ cd VideoMerger
 
 3. Install the required dependencies using pip:
 
-pip install -r requirements.txt
+`pip install -r requirements.txt`
 
 ## Usage
 
-1. Run the Video Merger application:
+1. To run the application, open the terminal in the project directory and type:
 
-python video_merger.py
+`python main.py`
 
 2. Click on the "Merge Videos" button to open a file dialog for selecting multiple video files.
 
